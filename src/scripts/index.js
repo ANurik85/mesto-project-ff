@@ -1,8 +1,6 @@
  
+import { initialCards } from './cards.js';
  import '../pages/index.css'; // добавьте импорт главного файла стилей 
-
-
-
 
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content; // Получаем шаблон карточки из HTML-документа
@@ -29,7 +27,8 @@ function deleteCard(evt) { // Функция для удаления карто�
 }
 
 // @todo: Вывести карточки на страницу
-initialCards.forEach(function (item) { // Создаем карточки из начального массива и добавляем их в список
+// Создаем карточки из начального массива и добавляем их в список
+initialCards.forEach(function (item) {
   const cardElement = addNewCard(item, deleteCard);
   cardList.append(cardElement);
 });
