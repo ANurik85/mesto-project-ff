@@ -6,7 +6,7 @@
 
 import '../pages/index.css'; // добавьте импорт главного файла стилей 
 import { initialCards } from './cards.js';
-import { addNewCard, deleteCard, LikeButtonClick, handleFormSubmitCard } from '../components/card.js';
+import { addNewCard, deleteCard, LikeButtonClick } from '../components/card.js';
 import { openModal, closeModal } from '../components/modal.js';
 
 // @todo: DOM узлы
@@ -32,6 +32,10 @@ const formElementCard = document.querySelector('form[name="new-place"]');
 const imgModal = document.querySelector('.popup_type_image');
 const ImgModalUrl = imgModal.querySelector('.popup__image');
 const ImgModalTitle = imgModal.querySelector('.popup__caption');
+// Получаем значения полей форми
+const nameInputCard = document.querySelector('input[name="place-name"]');
+const linkInputCard = document.querySelector('input[name="link"]');
+const cardsContainer = document.querySelector('.places__list');
 
 export function closeAllModal(modal) {
   closePopup.forEach(popupClose => {
@@ -45,16 +49,6 @@ export function closeOverlay(evt) {
   if (evt.target.classList.contains('popup')) {
     closeModal(evt.target);
   };
-}
-
-// Обработчик события для клавиши Esc
-export function closeByEsc(evt) {
-  if (evt.key === 'Escape') {
-    const openModals = document.querySelectorAll('.popup_is-opened');
-    openModals.forEach(modal => {
-      closeModal(modal);
-    });
-  }
 }
 
 // Функция для копирования значений полей профилья
@@ -83,6 +77,32 @@ function handleFormSubmitProfile(evt) {
   // Закрываю окно
   closeModal(formEditProfile.closest('.popup'));
 
+}
+
+// Функция добавления карточки
+function handleFormSubmitCard(evt) {
+  evt.preventDefault(); // Отменяем стандартную отправку форми
+
+  // Получаем значения полей форми
+  const nameValueCard = nameInputCard.value;
+  const linkValueCard = linkInputCard.value;
+
+  // Создаем объект
+  const newItemCard = {
+    name: nameValueCard,
+    link: linkValueCard
+  };
+
+  // Создаем новую карточки
+  const newCard = addNewCard(newItemCard, deleteCard);
+
+  // Добавляем карточку в начало
+
+  cardsContainer.prepend(newCard);
+
+  // Закрываем модальное окно
+  closeModal(evt.target.closest('.popup'));
+  evt.target.reset();
 }
 
 // Функция для класса анимации 

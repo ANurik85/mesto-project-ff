@@ -1,15 +1,9 @@
 /*
 Функции для работы с карточками проекта Mesto вынесите в файл card.js, из него должна экспортироваться функция createCard, которую вы создали раньше (у вас она может называться по-другому). Функции, обрабатывающие события лайка и удаления карточки, также должны находиться в этом файле и экспортироваться из него.
 */
-
-
-import { openModal, closeModal } from '../components/modal.js';
 import { zoomImgModal } from '../scripts/index.js';
 
 const cardTemplate = document.querySelector("#card-template").content; // Получаем шаблон карточки из HTML-документа
-// Получаем значения полей форми
-const nameInputCard = document.querySelector('input[name="place-name"]');
-const linkInputCard = document.querySelector('input[name="link"]');
 
 // @todo: Функция создания карточки
 export function addNewCard(item, LikeButtonClick, deleteCard) { // Функция для создания новой карточки
@@ -36,32 +30,6 @@ export function addNewCard(item, LikeButtonClick, deleteCard) { // Функци�
 //функцию обработчика лайка
 export function LikeButtonClick(evt) {
   evt.target.classList.toggle('card__like-button_is-active');
-}
-
-// Функция добавления карточки
-export function handleFormSubmitCard(evt) {
-  evt.preventDefault(); // Отменяем стандартную отправку форми
-
-  // Получаем значения полей форми
-  const nameValueCard = nameInputCard.value;
-  const linkValueCard = linkInputCard.value;
-
-  // Создаем объект
-  const newItemCard = {
-    name: nameValueCard,
-    link: linkValueCard
-  };
-
-  // Создаем новую карточки
-  const newCard = addNewCard(newItemCard, deleteCard);
-
-  // Добавляем карточку в начало
-  const cardsContainer = document.querySelector('.places__list');
-  cardsContainer.prepend(newCard);
-
-  // Закрываем модальное окно
-  closeModal(evt.target.closest('.popup'));
-  evt.target.reset();
 }
 
 // @todo: Функция удаления карточки
