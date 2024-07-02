@@ -37,13 +37,6 @@ const nameInputCard = document.querySelector('input[name="place-name"]');
 const linkInputCard = document.querySelector('input[name="link"]');
 const cardsContainer = document.querySelector('.places__list');
 
-export function closeAllModal(modal) {
-  closePopup.forEach(popupClose => {
-    popupClose.addEventListener('click', () => {
-      closeModal(modal);
-    });
-  });
-}
 // Обработчик события для overlay
 export function closeOverlay(evt) {
   if (evt.target.classList.contains('popup')) {
@@ -94,7 +87,7 @@ function handleFormSubmitCard(evt) {
   };
 
   // Создаем новую карточки
-  const newCard = addNewCard(newItemCard, deleteCard);
+  const newCard = addNewCard(newItemCard, LikeButtonClick, deleteCard);
 
   // Добавляем карточку в начало
 
@@ -121,6 +114,7 @@ export function zoomImgModal(element) {
   ImgModalTitle.textContent = element.name;
 
   openModal(imgModal);
+
 }
 
 formElementCard.addEventListener('submit', handleFormSubmitCard);
@@ -132,13 +126,19 @@ editButton.addEventListener('click', copyProfileValue);
 // Прикрепляем обработчик к форме:
 // он будет следить за событием “submit” - «отправка»
 formEditProfile.addEventListener('submit', handleFormSubmitProfile);
-
 // Вызов функцию анимации
 document.addEventListener('DOMContentLoaded', addAnimationPopup);
-
+// Вызов функцию закрытие по Overlay
 overlayContent.forEach(evt => {
   evt.addEventListener('click', closeOverlay);
 });
+// Находим и закрываем открытое модальное окно
+closePopup.forEach(button => button.addEventListener('click', () => {
+  const openModal = document.querySelector('.popup_is-opened');
+  if (openModal) {
+    closeModal(openModal);
+  }
+}));
 
 // @todo: Вывести карточки на страницу
 // Создаем карточки из начального массива и добавляем их в список
