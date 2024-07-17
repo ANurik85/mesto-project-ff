@@ -8,6 +8,7 @@ import '../pages/index.css'; // добавьте импорт главного �
 import { initialCards } from './cards.js';
 import { addNewCard, deleteCard, LikeButtonClick } from '../components/card.js';
 import { openModal, closeModal } from '../components/modal.js';
+import { enableValidation, clearValidation } from './validation.js';
 
 // @todo: DOM узлы
 const cardList = document.querySelector(".places__list"); // Получаем список, в который будем добавлять карточки
@@ -58,7 +59,7 @@ function handleFormSubmitProfile(evt) {
   evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
   // Так мы можем определить свою логику отправки.
   // О том, как это делать, расскажем позже.
-
+  
   // Получите значение полей jobInput и nameInput из свойства value
   const nameValue = nameInput.value;
   const jobValue = jobInput.value;
@@ -146,3 +147,27 @@ initialCards.forEach(function (item) {
   const cardElement = addNewCard(item, LikeButtonClick, deleteCard);
   cardList.append(cardElement);
 });
+
+
+// вызов функций enableValidation и clearValidation должен находиться в файле index.js
+
+// включение валидации вызовом enableValidation
+// все настройки передаются при вызове
+
+export const validationConfig = ({
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
+});
+
+// Вызовем функцию
+enableValidation(validationConfig);
+
+
+const profileForm = document.querySelector('.popup__form[name="edit-profile"]');
+
+// Очистка ошибок валидации при открытии формы профиля
+clearValidation(profileForm, validationConfig);
