@@ -1,22 +1,13 @@
 /*
 Функции для работы с карточками проекта Mesto вынесите в файл card.js, из него должна экспортироваться функция createCard, которую вы создали раньше (у вас она может называться по-другому). Функции, обрабатывающие события лайка и удаления карточки, также должны находиться в этом файле и экспортироваться из него.
 */
-import { zoomImgModal, cardsData, cardId, userId } from "../scripts/index.js";
-import {
-  updateLikeCount,
-  /*  deleteCardServer  */ deleteCard,
-} from "../scripts/api.js";
+import { zoomImgModal, cardsData, cardId, userId, likesCount } from "../scripts/index.js";
+import { updateLikeCount, deleteCard } from "../scripts/api.js";
 
 const cardTemplate = document.querySelector("#card-template").content; // Получаем шаблон карточки из HTML-документа
 
 // @todo: Функция создания карточки
-export function addNewCard(
-  item,
-  /* LikeButtonClick, */ deleteCard,
-  cardsData,
-  cardId,
-  userId
-) {
+export function addNewCard(item, deleteCard, cardsData, cardId, userId) {
   // Функция для создания новой карточки
   // @todo: Темплейт карточки
 
@@ -41,7 +32,7 @@ export function addNewCard(
 
   // Обработчик лайка
   likeButton.addEventListener("click", () => {
-    updateLikeCount(item._id, isLiked).then((data) => {
+    updateLikeCount(item._id, isLiked, likesCount).then((data) => {
       isLiked = !isLiked;
       likesCount = data.likes.length;
       likeButton.classList.toggle("card__like-button_is-active", isLiked);
@@ -55,4 +46,3 @@ export function addNewCard(
 
   return cardListItem; // Возвращаем созданную карточку
 }
-/* console.log( typeof cardsData.likes); */

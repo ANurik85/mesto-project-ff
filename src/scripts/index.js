@@ -5,9 +5,7 @@
 */
 
 import "../pages/index.css"; // добавьте импорт главного файла стилей
-import {
-  addNewCard /*  deleteCard, */ /* LikeButtonClick */,
-} from "../components/card.js";
+import { addNewCard } from "../components/card.js";
 import { openModal, closeModal } from "../components/modal.js";
 import { enableValidation, clearValidation } from "./validation.js";
 import {
@@ -25,10 +23,10 @@ import {
 const cardList = document.querySelector(".places__list"); // Получаем список, в который будем добавлять карточки
 const editButton = document.querySelector(".profile__edit-button");
 const addButton = document.querySelector(".profile__add-button");
-const addButtonAvatar = document.querySelector(".profile__image-block"); //--------
+const addButtonAvatar = document.querySelector(".profile__image-block");
 const modalEditProfile = document.querySelector(".popup_type_edit");
 const modalNewCard = document.querySelector(".popup_type_new-card");
-const modalNewAvatar = document.querySelector(".popup_type_new-avatar"); //--------
+const modalNewAvatar = document.querySelector(".popup_type_new-avatar");
 const closePopup = document.querySelectorAll(".popup__close");
 const overlayContent = document.querySelectorAll(".popup");
 // Находим форму в DOM
@@ -45,19 +43,19 @@ const jobInputProfile = document.querySelector(
 );
 // Обработчик к форме
 const formElementCard = document.querySelector('form[name="new-place"]');
-const formElementAvatar = document.querySelector('form[name="new-avatar"]'); //--------
+const formElementAvatar = document.querySelector('form[name="new-avatar"]');
 const imgModal = document.querySelector(".popup_type_image");
 const ImgModalUrl = imgModal.querySelector(".popup__image");
 const ImgModalTitle = imgModal.querySelector(".popup__caption");
 // Получаем значения полей форми
 const nameInputCard = document.querySelector('input[name="place-name"]');
 const linkInputCard = document.querySelector('input[name="link"]');
-const linkInputAvatar = document.querySelector('input[name="link-avatar"]'); //--------
+const linkInputAvatar = document.querySelector('input[name="link-avatar"]');
 
 const profileImage = document.querySelector(".profile__image");
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
-const likeCounter = document.querySelector(".counter__like");
+
 // Обработчик события для overlay
 export function closeOverlay(evt) {
   if (evt.target.classList.contains("popup")) {
@@ -86,9 +84,7 @@ function handleFormSubmitProfile(evt) {
     about: aboutValue,
     // Другие свойства, если необходимо
   };
-
   showLoadingSaveText(); // Показываем текст загрузки
-
   patchProfileData(updatedProfileData)
     .then(() => {
       // После успешной загрузки:
@@ -123,7 +119,6 @@ function handleFormSubmitAvatar(evt) {
 // Функция добавления карточки
 function handleFormSubmitCard(evt) {
   evt.preventDefault(); // Отменяем стандартную отправку форми
-
   // Получаем значения полей форми
   const nameValueCard = nameInputCard.value;
   const linkValueCard = linkInputCard.value;
@@ -131,6 +126,7 @@ function handleFormSubmitCard(evt) {
   const newItemCard = {
     name: nameValueCard,
     link: linkValueCard,
+    likes: [],
   };
   showLoadingSaveText(); // Показываем текст загрузки
   postAddCards(newItemCard)
@@ -142,19 +138,19 @@ function handleFormSubmitCard(evt) {
       evt.target.reset();
     })
     .catch((err) => {
-      console.error("Ошибка по добавление карточки::", err);
+      console.error("Ошибка по добавление карточки:", err);
       showLoadingSaveText(); // Показываем текст загрузки
     });
 
   // Создаем новую карточки
   const newCard = addNewCard(
     newItemCard,
-    /*  LikeButtonClick, */
     deleteCard,
     cardIds,
     cardsData,
     cardId,
-    userId
+    userId,
+    likesCount
   );
   // Добавляем карточку в начало
   cardList.prepend(newCard);
@@ -173,7 +169,6 @@ export function zoomImgModal(element) {
   ImgModalUrl.src = element.link;
   ImgModalUrl.alt = element.name;
   ImgModalTitle.textContent = element.name;
-
   openModal(imgModal);
 }
 
@@ -205,19 +200,18 @@ closePopup.forEach((button) =>
 );
 
 // @todo: Вывести карточки на страницу
-
 // Вывод карточек на страницу
-
 export let userId = null;
 export let cardIds = [];
 export let cardId = [];
+export let cardsData = [];
+export let likesCount = cardsData.likes;
 
 Promise.all([getInitialCards(), getInitialUser()])
   .then(([cardsData, userData]) => {
     userId = userData._id;
     cardIds = cardsData._id;
     cardId = cardsData._id;
-    /*  cardLike = cardsData.likes.length; */
 
     cardsData.forEach(function (item) {
       const newCard = addNewCard(
@@ -226,7 +220,8 @@ Promise.all([getInitialCards(), getInitialUser()])
         cardIds,
         cardsData,
         cardId,
-        userId
+        userId,
+        likesCount
       );
 
       // Добавляем обработчик клика на кнопку удаления
@@ -241,7 +236,6 @@ Promise.all([getInitialCards(), getInitialUser()])
       } else {
         deleteButton.style.display = "none";
       }
-
       cardList.append(newCard);
     });
 
