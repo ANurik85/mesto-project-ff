@@ -34,8 +34,7 @@ export function createNewCard(
   const Liked = likeButton.classList.contains("card__like-button");
   const isLiked = likeButton.classList.contains("card__like-button_is-active");
   const likesCount = cardData.likes.length; // Начальное количество лайков
-  // Устанавливаем начальное состояние лайка и счетчика
-  likeCounter.textContent = likesCount;
+  likeCounter.textContent = likesCount; // Устанавливаем начальное состояние лайка и счетчика
 
   if (cardData.likes.some((like) => like._id === userId)) {
     // Карточка лайкнута
@@ -48,7 +47,6 @@ export function createNewCard(
       likeButton.classList.add("card__like-button");
     });
   }
-
   likeButton.addEventListener("click", () =>
     likeCardCallback(likeButton, likeCounter, cardData._id)
   );
