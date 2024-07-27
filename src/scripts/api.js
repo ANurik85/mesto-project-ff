@@ -1,7 +1,6 @@
 // Для работы с API создайте файл api.js. Все запросы присвойте переменным и экспортируйте их. В других модулях вы сможете импортировать эти функции и вызывать их.
-const profileImage = document.querySelector(".profile__image");
-const saveText = document.querySelector(".popup__button");
-export const config = {
+
+const config = {
   baseUrl: "https://nomoreparties.co/v1/wff-cohort-18",
   headers: {
     authorization: "813eeaa3-fa56-4801-bdce-a3b4cdeab4d2",
@@ -9,18 +8,21 @@ export const config = {
   },
 };
 
+const handleResponse = (res, errorText) => {
+  if (res.ok) {
+    return res.json();
+  } else {
+    throw new Error(errorText);
+  }
+};
+
 // Загрузка информации о пользователе с сервера
 export function getInitialUser() {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers,
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-
-    // если ошибка, отклоняем промис
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
+  }).then((res) =>
+    handleResponse(res, "Ошибка по загрузке информации о пользователе:")
+  );
 }
 
 // Загрузка карточек с сервера
@@ -29,43 +31,18 @@ export function getInitialCards() {
   // Код для получения карточек
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-
-    // если ошибка, отклоняем промис
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
+  }).then((res) =>
+    handleResponse(res, "Ошибка пo загрузка карточек с сервера:")
+  );
 }
 
 // Редактирование профиля
-export function patchProfileData(arrayInfo) {
+export function patchProfileData(userData) {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
-    body: JSON.stringify(arrayInfo),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Ошибка при сохранении данных");
-      }
-      // Возвращаем что-то, если нужно
-      return response.json();
-    })
-    .catch((error) => {
-      console.error("Ошибка при сохранении данных:", error);
-      // Обработка ошибок (если необходимо)
-      throw error; // Прокидываем ошибку дальше
-    });
-}
-
-export function showLoadingSaveText() {
-  saveText.textContent = "Сохранить...";
-}
-
-export function hideLoadingSaveText() {
-  saveText.textContent = "Сохранить";
+    body: JSON.stringify(userData),
+  }).then((res) => handleResponse(res, "Ошибка при сохранении данных:"));
 }
 
 // Обновление аватара
@@ -74,39 +51,18 @@ export function updateAvatar(newAvatar) {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({ avatar: newAvatar }), // Передаем новую ссылку на аватар в теле запроса
-  })
-    .then((res) => {
-      if (res.ok) {
-        profileImage.style.backgroundImage = `url('${newAvatar}')`;
-        return res.json();
-      } else {
-        console.error("Ошибка при обновлении аватара:", res.status);
-      }
-    })
-    .catch((error) => {
-      console.error("Ошибка при выполнении запроса:", error);
-    });
+  }).then((res) => handleResponse(res, "Ошибка при обновлении аватара:"));
 }
 
 // Добавление новой карточки
-export function postAddCards(arrayInfo) {
+export function postAddCards(cardData) {
   return fetch(`${config.baseUrl}/cards`, {
     method: "POST",
     headers: config.headers,
-    body: JSON.stringify(arrayInfo),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Ошибка при добавление новой карточки");
-      }
-      // Возвращаем что-то, если нужно
-      return response.json();
-    })
-    .catch((error) => {
-      console.error("Ошибка по добавление карточки:", error);
-      // Обработка ошибок (если необходимо)
-      throw error; // Прокидываем ошибку дальше
-    });
+    body: JSON.stringify(cardData),
+  }).then((res) =>
+    handleResponse(res, "Ошибка при добавление новой карточки:")
+  );
 }
 
 export function updateLikeCount(cardId, isLiked) {
@@ -116,16 +72,7 @@ export function updateLikeCount(cardId, isLiked) {
     method,
     headers: config.headers,
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Ошибка по обновлениие лайка");
-      }
-      return response.json();
-    })
-
-    .catch((error) => {
-      console.error("Ошибка по обработке лайка:", error);
-    });
+    .then((res) => handleResponse(res, "Ошибка по обновлениие лайка:"))
 }
 
 export function deleteCard(cardId) {
@@ -133,17 +80,5 @@ export function deleteCard(cardId) {
     method: "DELETE",
     headers: config.headers,
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Ошибка по удаление карточки");
-      }
-      // Успешное удаление карточки
-      console.log("Карточка успешно удалена");
-      // Возвращаем что-то, если нужно
-      return response.json();
-    })
-
-    .catch((error) => {
-      console.error("Ошибка по обработке удаление карточки:", error);
-    });
+    .then((res) => handleResponse(res, "Ошибка по удаление карточки:"))
 }

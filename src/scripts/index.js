@@ -5,7 +5,11 @@
 */
 
 import "../pages/index.css"; // добавьте импорт главного файла стилей
-import { addNewCard } from "../components/card.js";
+import {
+  createNewCard,
+  deleteCardCallback,
+  likeCardCallback,
+} from "../components/card.js";
 import { openModal, closeModal } from "../components/modal.js";
 import { enableValidation, clearValidation } from "./validation.js";
 import {
@@ -14,9 +18,6 @@ import {
   patchProfileData,
   postAddCards,
   updateAvatar,
-  deleteCard,
-  hideLoadingSaveText,
-  showLoadingSaveText,
 } from "./api.js";
 
 // @todo: DOM узлы
@@ -68,6 +69,7 @@ function copyProfileValue() {
   nameInput.value = nameProfile.textContent;
   jobInput.value = jobProfile.textContent;
   openModal(formEditProfile.closest(".popup"));
+  clearValidation(profileForm, validationConfig);
 }
 
 // Обработчик «отправки» формы для редактирование профиля
@@ -86,14 +88,17 @@ function handleFormSubmitProfile(evt) {
   };
   showLoadingSaveText(); // Показываем текст загрузки
   patchProfileData(updatedProfileData)
-    .then(() => {
+    .then((userData) => {
       // После успешной загрузки:
+
       hideLoadingSaveText(); // Скрываем текст загрузки
       closeModal(formEditProfile.closest(".popup")); // Закрываем
     })
     .catch((err) => {
       console.error("Ошибка при сохранении данные профиля:", err);
-      showLoadingSaveText(); // Показываем текст загрузки
+    })
+    .finally(() => {
+      hideLoadingSaveText(); // Скрываем текст загрузки
     });
 }
 
@@ -109,10 +114,13 @@ function handleFormSubmitAvatar(evt) {
       hideLoadingSaveText(); // Скрываем текст загрузки
       closeModal(evt.target.closest(".popup")); // Закрываем модальное окно
       evt.target.reset(); // Сбрасываем значения формы
+      clearValidation(profileForm, validationConfig);
     })
     .catch((err) => {
       console.error("Ошибка при обновлении аватара:", err);
-      showLoadingSaveText(); // Показываем текст загрузки
+    })
+    .finally(() => {
+      hideLoadingSaveText(); // Скрываем текст загрузки
     });
 }
 
@@ -126,34 +134,34 @@ function handleFormSubmitCard(evt) {
   const newItemCard = {
     name: nameValueCard,
     link: linkValueCard,
-    likes: [],
   };
   showLoadingSaveText(); // Показываем текст загрузки
   postAddCards(newItemCard)
-    .then(() => {
+    .then((cardData) => {
       // После успешной загрузки:
+      // Создаем новую карточки
+      const newCard = createNewCard(
+        cardData,
+        deleteCardCallback,
+        likeCardCallback,
+        zoomCardCallback,
+        userId
+      );
+      // Добавляем карточку в начало
+      cardList.prepend(newCard);
       hideLoadingSaveText(); // Скрываем текст загрузки
       // Закрываем модальное окно
       closeModal(evt.target.closest(".popup"));
       evt.target.reset();
+      // Очистка ошибок валидации при открытии формы профиля
+      clearValidation(profileForm, validationConfig);
     })
     .catch((err) => {
       console.error("Ошибка по добавление карточки:", err);
-      showLoadingSaveText(); // Показываем текст загрузки
+    })
+    .finally(() => {
+      hideLoadingSaveText(); // Скрываем текст загрузки
     });
-
-  // Создаем новую карточки
-  const newCard = addNewCard(
-    newItemCard,
-    deleteCard,
-    cardIds,
-    cardsData,
-    cardId,
-    userId,
-    likesCount
-  );
-  // Добавляем карточку в начало
-  cardList.prepend(newCard);
 }
 
 // Функция для класса анимации
@@ -165,11 +173,27 @@ function addAnimationPopup() {
 }
 
 // Функция клик по изображению
-export function zoomImgModal(element) {
+export const zoomCardCallback = (element) => {
   ImgModalUrl.src = element.link;
   ImgModalUrl.alt = element.name;
   ImgModalTitle.textContent = element.name;
   openModal(imgModal);
+};
+
+function showLoadingSaveText() {
+  const openModal = document.querySelector(".popup_is-opened");
+  if (openModal) {
+    const saveButton = openModal.querySelector(".popup__button");
+    saveButton.textContent = "Сохранить...";
+  }
+}
+
+function hideLoadingSaveText() {
+  const openModal = document.querySelector(".popup_is-opened");
+  if (openModal) {
+    const saveButton = openModal.querySelector(".popup__button");
+    saveButton.textContent = "Сохранить";
+  }
 }
 
 formElementCard.addEventListener("submit", handleFormSubmitCard);
@@ -178,8 +202,6 @@ addButton.addEventListener("click", () => openModal(modalNewCard));
 formElementAvatar.addEventListener("submit", handleFormSubmitAvatar);
 addButtonAvatar.addEventListener("click", () => openModal(modalNewAvatar));
 
-// Вызов функции копирования значений при открытии модального окна
-editButton.addEventListener("click", copyProfileValue);
 // Прикрепляем обработчик к форме:
 // он будет следить за событием “submit” - «отправка»
 formEditProfile.addEventListener("submit", handleFormSubmitProfile);
@@ -202,40 +224,19 @@ closePopup.forEach((button) =>
 // @todo: Вывести карточки на страницу
 // Вывод карточек на страницу
 export let userId = null;
-export let cardIds = [];
-export let cardId = [];
-export let cardsData = [];
-export let likesCount = cardsData.likes;
 
 Promise.all([getInitialCards(), getInitialUser()])
-  .then(([cardsData, userData]) => {
+  .then(([cardData, userData]) => {
     userId = userData._id;
-    cardIds = cardsData._id;
-    cardId = cardsData._id;
 
-    cardsData.forEach(function (item) {
-      const newCard = addNewCard(
+    cardData.forEach(function (item) {
+      const newCard = createNewCard(
         item,
-        deleteCard,
-        cardIds,
-        cardsData,
-        cardId,
-        userId,
-        likesCount
+        deleteCardCallback,
+        likeCardCallback,
+        zoomCardCallback,
+        userId
       );
-
-      // Добавляем обработчик клика на кнопку удаления
-      const deleteButton = newCard.querySelector(".card__delete-button");
-      if (item.owner._id === userId) {
-        deleteButton.addEventListener("click", () => {
-          deleteCard(item._id).then(() => {
-            // Удаляем карточку из интерфейса
-            newCard.remove();
-          });
-        });
-      } else {
-        deleteButton.style.display = "none";
-      }
       cardList.append(newCard);
     });
 
@@ -248,7 +249,6 @@ Promise.all([getInitialCards(), getInitialUser()])
   });
 
 // вызов функций enableValidation и clearValidation должен находиться в файле index.js
-
 // включение валидации вызовом enableValidation
 // все настройки передаются при вызове
 
@@ -265,6 +265,3 @@ export const validationConfig = {
 enableValidation(validationConfig);
 
 const profileForm = document.querySelector('.popup__form[name="edit-profile"]');
-
-// Очистка ошибок валидации при открытии формы профиля
-clearValidation(profileForm, validationConfig);
