@@ -38,15 +38,12 @@ export function createNewCard(
 
   if (cardData.likes.some((like) => like._id === userId)) {
     // Карточка лайкнута
-    updateLikeCount(cardData._id, isLiked).then((data) => {
-      likeButton.classList.add("card__like-button_is-active");
-    });
+    likeButton.classList.add("card__like-button_is-active");
   } else {
     // Карточка не лайкнута
-    updateLikeCount(cardData._id, Liked).then((data) => {
-      likeButton.classList.add("card__like-button");
-    });
+    likeButton.classList.add("card__like-button");
   }
+
   likeButton.addEventListener("click", () =>
     likeCardCallback(likeButton, likeCounter, cardData._id)
   );

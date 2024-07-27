@@ -90,7 +90,9 @@ function handleFormSubmitProfile(evt) {
   patchProfileData(updatedProfileData)
     .then((userData) => {
       // После успешной загрузки:
-
+      // Обновляем данные на странице
+      profileTitle.textContent = userData.name;
+      profileDescription.textContent = userData.about;
       hideLoadingSaveText(); // Скрываем текст загрузки
       closeModal(formEditProfile.closest(".popup")); // Закрываем
     })
