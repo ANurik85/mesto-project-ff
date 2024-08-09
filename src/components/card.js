@@ -25,7 +25,7 @@ export function createNewCard(
   cardListItem.querySelector(".card__title").textContent = cardData.name; // Устанавливаем заголовок карточки
   cardImage.addEventListener("click", () =>
     zoomCardCallback(cardData)
-  ); /* cardData */
+  ); 
 
   const likeButton = cardListItem.querySelector(".card__like-button");
   const likeCounter = cardListItem.querySelector(".counter__like");
